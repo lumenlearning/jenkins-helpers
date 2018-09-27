@@ -1,7 +1,7 @@
-def call(profile, envName) {
+def call(profileName, envName) {
   def cmd = "/usr/bin/aws elasticbeanstalk describe-environments"
   def region = "--region us-west-2"
-  def profile = "--profile=${profile}"
+  def profile = "--profile=${profileName}"
   def env = "--environment-name ${envName}"
 
   def description = sh(returnStdout: true, script: "${cmd} ${region} ${profile} ${env}").trim()
