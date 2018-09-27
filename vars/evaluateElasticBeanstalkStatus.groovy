@@ -1,11 +1,10 @@
 def call(profile, envName) {
-  String statusScript = """/usr/bin/aws elasticbeanstalk describe-environments
-    --region us-west-2
-    --profile=${profile}
-    --environment-name ${envName}
-  """.stripIdent()
+  def cmd = "/usr/bin/aws elasticbeanstalk describe-environments"
+  def region = "--region us-west-2"
+  def profile = "--profile=${profile}"
+  def env = "--environment-name ${envName}"
 
-  def description = sh(returnStdout: true, script: statusScript).trim()
+  def description = sh(returnStdout: true, script: "${cmd} ${region} ${profile} ${env}").trim()
   echo "${description}"
 
   def env = parseElasticBeanstalkStatus(description)
