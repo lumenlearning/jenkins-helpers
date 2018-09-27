@@ -7,17 +7,17 @@ def call(profileName, envName) {
   def description = sh(returnStdout: true, script: "${cmd} ${region} ${profile} ${env}").trim()
   echo "${description}"
 
-  def env = parseElasticBeanstalkStatus(description)
-  echo "Status, Health is ${env.Status}, ${env.Health}"
+  def status = parseElasticBeanstalkStatus(description)
+  echo "Status, Health is ${status.Status}, ${status.Health}"
 
   def completedHealth = ''
 
-  if (env.Status == 'Launching' || env.Status == 'Updating') {
+  if (status.Status == 'Launching' || status.Status == 'Updating') {
     echo "Status is still pending"
   }
   else {
-    echo "Status is complete (${env.Health})"
-    completedHealth = env.Health
+    echo "Status is complete (${status.Health})"
+    completedHealth = status.Health
   }
 
   return completedHealth
