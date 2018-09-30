@@ -1,20 +1,15 @@
-Boolean DEV_DEPLOYMENT_REQUESTED = false
-Boolean STAGING_DEPLOYMENT_REQUESTED = false
-Boolean PROD_DEPLOYMENT_REQUESTED = false
-Boolean DEPLOY_REQUESTED = false
-
 def setupEnvironments() {
   assert params.SKIP_TESTS_REQUESTED instanceof Boolean
   assert params.DEV_DEPLOYMENT_REQUESTED instanceof Boolean
   assert params.STAGING_DEPLOYMENT_REQUESTED instanceof Boolean
 
-  PROD_DEPLOYMENT_REQUESTED = (env.TAG_NAME != null && env.TAG_NAME != "")
+  env.PROD_DEPLOYMENT_REQUESTED = (env.TAG_NAME != null && env.TAG_NAME != "")
   // Dev and Staging always happen for Prod deploys
-  DEV_DEPLOYMENT_REQUESTED = params.DEV_DEPLOYMENT_REQUESTED == true || PROD_DEPLOYMENT_REQUESTED == true
-  STAGING_DEPLOYMENT_REQUESTED = params.STAGING_DEPLOYMENT_REQUESTED == true || PROD_DEPLOYMENT_REQUESTED == true
+  env.DEV_DEPLOYMENT_REQUESTED = params.DEV_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
+  env.STAGING_DEPLOYMENT_REQUESTED = params.STAGING_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
 
   // If any server deployment was requested
-  DEPLOY_REQUESTED = (DEV_DEPLOYMENT_REQUESTED || STAGING_DEPLOYMENT_REQUESTED || PROD_DEPLOYMENT_REQUESTED)
+  env.DEPLOY_REQUESTED = (env.DEV_DEPLOYMENT_REQUESTED || env.STAGING_DEPLOYMENT_REQUESTED || env.PROD_DEPLOYMENT_REQUESTED)
 }
 
 def setupS3(appName) {
@@ -52,21 +47,21 @@ def setupRequestor() {
 def slackSendSetup(appName) {
   def optionsMsg = ""
 
-  if (DEPLOY_REQUESTED == true) {
+  if (env.DEPLOY_REQUESTED == true) {
     optionsMsg += params.SKIP_TESTS_REQUESTED == true ? "~Tests~" : "Tests ✓"
 
     optionsMsg += " | "
-    optionsMsg += DEV_DEPLOYMENT_REQUESTED == true ? "Dev ✓" : "~Dev~"
+    optionsMsg += env.DEV_DEPLOYMENT_REQUESTED == true ? "Dev ✓" : "~Dev~"
 
     optionsMsg += " | "
-    optionsMsg += STAGING_DEPLOYMENT_REQUESTED == true ? "Staging ✓" : "~Staging~"
+    optionsMsg += env.STAGING_DEPLOYMENT_REQUESTED == true ? "Staging ✓" : "~Staging~"
 
     optionsMsg += " | "
-    optionsMsg += PROD_DEPLOYMENT_REQUESTED == true ? "Prod ✓" : "~Prod~"
+    optionsMsg += env.PROD_DEPLOYMENT_REQUESTED == true ? "Prod ✓" : "~Prod~"
   }
 
   def linksMsg = "<${BUILD_URL}|Jenkins Build>"
-  linksMsg += PROD_DEPLOYMENT_REQUESTED == true ? " | ${SLACK_RELEASE_LINK}" : ""
+  linksMsg += env.PROD_DEPLOYMENT_REQUESTED == true ? " | ${SLACK_RELEASE_LINK}" : ""
 
   slackSendInfo(
     """
