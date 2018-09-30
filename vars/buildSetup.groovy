@@ -1,15 +1,26 @@
-def setupEnvironments() {
+def setupDeployments() {
   assert params.SKIP_TESTS_REQUESTED instanceof Boolean
   assert params.DEV_DEPLOYMENT_REQUESTED instanceof Boolean
   assert params.STAGING_DEPLOYMENT_REQUESTED instanceof Boolean
 
-  env.PROD_DEPLOYMENT_REQUESTED = (env.TAG_NAME != null && env.TAG_NAME != "")
-  // Dev and Staging always happen for Prod deploys
-  env.DEV_DEPLOYMENT_REQUESTED = params.DEV_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
-  env.STAGING_DEPLOYMENT_REQUESTED = params.STAGING_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
+  Map deployments = [
+    prod: (env.TAG_NAME != null && env.TAG_NAME != "")
+  ]
 
-  // If any server deployment was requested
-  env.DEPLOY_REQUESTED = (env.DEV_DEPLOYMENT_REQUESTED || env.STAGING_DEPLOYMENT_REQUESTED || env.PROD_DEPLOYMENT_REQUESTED)
+  deployments.dev = params.DEV_DEPLOYMENT_REQUESTED == true || deployments.prod == true
+  deployments.staging = params.STAGING_DEPLOYMENT_REQUESTED == true || deployments.prod == true
+  deployments.any = deployments.dev || deployments.staging || deployments.prod
+
+
+  return deployments
+
+  // env.PROD_DEPLOYMENT_REQUESTED = (env.TAG_NAME != null && env.TAG_NAME != "")
+  // // Dev and Staging always happen for Prod deploys
+  // env.DEV_DEPLOYMENT_REQUESTED = params.DEV_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
+  // env.STAGING_DEPLOYMENT_REQUESTED = params.STAGING_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
+
+  // // If any server deployment was requested
+  // env.DEPLOY_REQUESTED = (env.DEV_DEPLOYMENT_REQUESTED || env.STAGING_DEPLOYMENT_REQUESTED || env.PROD_DEPLOYMENT_REQUESTED)
 }
 
 def setupS3(repoName) {
@@ -71,7 +82,13 @@ def slackSendSetup(appName) {
   )
 }
 
-def call(appName, repoName) {
+def call(Map config) {
+  assert config.appName != null
+
+  if (config.repoName == null) {
+    config.repoName = config.appName.toLowerCase()
+  }
+
   // For troubleshotting
   echo "TAG_NAME: ${env.TAG_NAME}"
 
@@ -86,8 +103,9 @@ def call(appName, repoName) {
 
   echo "Build label: ${env.BUILD_LABEL}"
 
-  setupEnvironments()
-  setupS3(repoName)
+  def deployments = setupDeployments()
+  echo "${deployments}"
+  setupS3(config.repoName)
   setupRequestor()
-  slackSendSetup(appName)
+  slackSendSetup(config.appName)
 }
