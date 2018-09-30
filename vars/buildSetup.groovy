@@ -87,7 +87,7 @@ def call(appName, repoName) {
   echo "Build label: ${env.BUILD_LABEL}"
 
   setupEnvironments()
-  setupS3(appName, repoName)
+  setupS3(repoName)
   setupRequestor()
   slackSendSetup(appName)
 }
