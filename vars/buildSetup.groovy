@@ -103,8 +103,7 @@ def call(Map config) {
 
   echo "Build label: ${env.BUILD_LABEL}"
 
-  def deployments = setupDeployments()
-  echo "${deployments}"
+  env.DEPLOYMENTS = setupDeployments()
   setupS3(config.repoName)
   setupRequestor()
   slackSendSetup(config.appName)
