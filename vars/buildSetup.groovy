@@ -1,4 +1,13 @@
+Boolean DEV_DEPLOYMENT_REQUESTED = false
+Boolean STAGING_DEPLOYMENT_REQUESTED = false
+Boolean PROD_DEPLOYMENT_REQUESTED = false
+Boolean DEPLOY_REQUESTED = false
+
 def setupEnvironments() {
+  assert params.SKIP_TESTS_REQUESTED instanceof Boolean
+  assert params.DEV_DEPLOYMENT_REQUESTED instanceof Boolean
+  assert params.STAGING_DEPLOYMENT_REQUESTED instanceof Boolean
+
   PROD_DEPLOYMENT_REQUESTED = (env.TAG_NAME != null && env.TAG_NAME != "")
   // Dev and Staging always happen for Prod deploys
   DEV_DEPLOYMENT_REQUESTED = params.DEV_DEPLOYMENT_REQUESTED == true || PROD_DEPLOYMENT_REQUESTED == true
@@ -21,8 +30,15 @@ def setupS3(appName) {
 }
 
 def setupRequestor() {
+  /**
+   * Who should be identified as responsible for triggering the build. This gets
+   * included in slack messages, and is derived from many sources based on the
+   * whatever can be extracted from the build cause and run context.
+   */
+  env.WHO_STARTED_BUILD = ''
+
   // When triggered by a Pull Request event:
-  if (env.WHO_STARTED_BUILD == '' && env.CHANGE_AUTHOR) {
+  if (env.CHANGE_AUTHOR) {
     env.WHO_STARTED_BUILD = "*${env.CHANGE_AUTHOR}*'s Pull Request"
   }
 
