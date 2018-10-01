@@ -1,30 +1,19 @@
-def setupDeployments() {
+def setupEnvironments() {
   assert params.SKIP_TESTS_REQUESTED instanceof Boolean
   assert params.DEV_DEPLOYMENT_REQUESTED instanceof Boolean
   assert params.STAGING_DEPLOYMENT_REQUESTED instanceof Boolean
 
-  Map deployments = [
-    prod: (env.TAG_NAME != null && env.TAG_NAME != "")
-  ]
+  env.PROD_DEPLOYMENT_REQUESTED = (env.TAG_NAME != null && env.TAG_NAME != "")
+  // Dev and Staging always happen for Prod deploys
+  env.DEV_DEPLOYMENT_REQUESTED = params.DEV_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
+  env.STAGING_DEPLOYMENT_REQUESTED = params.STAGING_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
 
-  deployments.dev = params.DEV_DEPLOYMENT_REQUESTED == true || deployments.prod == true
-  deployments.staging = params.STAGING_DEPLOYMENT_REQUESTED == true || deployments.prod == true
-  deployments.any = deployments.dev || deployments.staging || deployments.prod
-
-
-  return deployments
-
-  // env.PROD_DEPLOYMENT_REQUESTED = (env.TAG_NAME != null && env.TAG_NAME != "")
-  // // Dev and Staging always happen for Prod deploys
-  // env.DEV_DEPLOYMENT_REQUESTED = params.DEV_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
-  // env.STAGING_DEPLOYMENT_REQUESTED = params.STAGING_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
-
-  // // If any server deployment was requested
-  // env.DEPLOY_REQUESTED = (env.DEV_DEPLOYMENT_REQUESTED || env.STAGING_DEPLOYMENT_REQUESTED || env.PROD_DEPLOYMENT_REQUESTED)
+  // If any server deployment was requested
+  env.DEPLOY_REQUESTED = (env.DEV_DEPLOYMENT_REQUESTED || env.STAGING_DEPLOYMENT_REQUESTED || env.PROD_DEPLOYMENT_REQUESTED)
 }
 
-def setupS3(identifier) {
-  env.S3_ARTIFACT_PATH = "${identifier}/build-${BUILD_LABEL}.zip"
+def setupS3(repoName) {
+  env.S3_ARTIFACT_PATH = "${repoName}/build-${BUILD_LABEL}.zip"
   
   env.S3_ARTIFACTS_BUCKET_URL_STG = "s3://${S3_ARTIFACTS_BUCKET_STG}"
   env.S3_ARTIFACTS_BUCKET_URL_PROD = "s3://${S3_ARTIFACTS_BUCKET_PROD}"
@@ -96,14 +85,16 @@ def call(Map config) {
   env.BUILD_LABEL = "${JOB_NAME}-${BUILD_NUMBER}".replace("%2F", "-").replace("/", "-")
 
   // Link to the GitHub Release. Will be useless on non-tag builds.
-  env.GITHUB_RELEASE_URL = "https://github.com/lumenlearning/${config.repoName}/releases/tag/${env.TAG_NAME}"
+  env.GITHUB_RELEASE_URL = "https://github.com/lumenlearning/${repoName}/releases/tag/${env.TAG_NAME}"
 
   // Slack-formatted Link to Release Notes:
   env.SLACK_RELEASE_LINK = "<${env.GITHUB_RELEASE_URL}|Release Notes>"
 
   echo "Build label: ${env.BUILD_LABEL}"
 
-  env.DEPLOYMENTS = setupDeployments()
+  setupEnvironments()
+
+  echo "Dev deploy requested? ${env.DEV_DEPLOYMENT_REQUESTED}"
   setupS3(config.repoName)
   setupRequestor()
   slackSendSetup(config.appName)
