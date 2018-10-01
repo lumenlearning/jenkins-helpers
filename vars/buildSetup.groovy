@@ -45,6 +45,8 @@ def setupRequestor() {
 def slackSendSetup(appName) {
   def optionsMsg = ""
 
+  echo "Any deploy requested? (Slack send) ${env.DEPLOY_REQUESTED}"
+
   if (env.DEPLOY_REQUESTED == true) {
     optionsMsg += params.SKIP_TESTS_REQUESTED == true ? "~Tests~" : "Tests ✓"
 
@@ -93,6 +95,8 @@ def call(Map config) {
   echo "Build label: ${env.BUILD_LABEL}"
 
   setupEnvironments()
+
+  echo "Any deploy requested? ${env.DEPLOY_REQUESTED}"
   setupS3(config.repoName)
   setupRequestor()
   slackSendSetup(config.appName)
