@@ -66,9 +66,9 @@ def slackSendSetup(appName) {
   linksMsg += env.PROD_DEPLOYMENT_REQUESTED == 'true' ? " | ${SLACK_RELEASE_LINK}" : ""
 
   slackSendInfo(
-    """
-    ${appName} build "${BUILD_LABEL}" started.
-    By ${WHO_STARTED_BUILD}
+    message: """
+    ${appName} build "${env.BUILD_LABEL}" started.
+    By ${env.WHO_STARTED_BUILD}
     ${linksMsg}
     ${optionsMsg}
     """.stripIndent()
