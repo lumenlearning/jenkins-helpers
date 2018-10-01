@@ -49,8 +49,6 @@ def setupRequestor() {
 def slackSendSetup(appName) {
   def optionsMsg = ""
 
-  echo "Any deploy requested? (Slack send) ${env.DEPLOY_REQUESTED}"
-
   if (env.DEPLOY_REQUESTED == 'true') {
     optionsMsg += params.SKIP_TESTS_REQUESTED == true ? "~Tests~" : "Tests ✓"
 
@@ -90,17 +88,15 @@ def call(Map config) {
   // Unique slug name to identify this build and to name artifact files
   env.BUILD_LABEL = "${JOB_NAME}-${BUILD_NUMBER}".replace("%2F", "-").replace("/", "-")
 
+  echo "Build label: ${env.BUILD_LABEL}"
+
   // Link to the GitHub Release. Will be useless on non-tag builds.
   env.GITHUB_RELEASE_URL = "https://github.com/lumenlearning/${config.repoName}/releases/tag/${env.TAG_NAME}"
 
   // Slack-formatted Link to Release Notes:
   env.SLACK_RELEASE_LINK = "<${env.GITHUB_RELEASE_URL}|Release Notes>"
 
-  echo "Build label: ${env.BUILD_LABEL}"
-
   setupEnvironments()
-
-  echo "Any deploy requested? ${env.DEPLOY_REQUESTED}"
   setupS3(config.repoName)
   setupRequestor()
   slackSendSetup(config.appName)
