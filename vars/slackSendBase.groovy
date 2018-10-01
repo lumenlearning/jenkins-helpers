@@ -12,6 +12,6 @@ def call(options) {
   slackSend(
     channel: options.channel,
     color: options.color,
-    message: msg
+    message: options.message
   )
 }
