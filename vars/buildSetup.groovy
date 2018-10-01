@@ -9,7 +9,11 @@ def setupEnvironments() {
   env.STAGING_DEPLOYMENT_REQUESTED = params.STAGING_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
 
   // If any server deployment was requested
-  env.DEPLOY_REQUESTED = (env.DEV_DEPLOYMENT_REQUESTED || env.STAGING_DEPLOYMENT_REQUESTED || env.PROD_DEPLOYMENT_REQUESTED)
+  env.DEPLOY_REQUESTED = (
+    env.DEV_DEPLOYMENT_REQUESTED == 'true' || 
+    env.STAGING_DEPLOYMENT_REQUESTED == 'true' || 
+    env.PROD_DEPLOYMENT_REQUESTED == 'true'
+  )
 }
 
 def setupS3(identifier) {
@@ -47,21 +51,21 @@ def slackSendSetup(appName) {
 
   echo "Any deploy requested? (Slack send) ${env.DEPLOY_REQUESTED}"
 
-  if (env.DEPLOY_REQUESTED == true) {
+  if (env.DEPLOY_REQUESTED == 'true') {
     optionsMsg += params.SKIP_TESTS_REQUESTED == true ? "~Tests~" : "Tests ✓"
 
     optionsMsg += " | "
-    optionsMsg += env.DEV_DEPLOYMENT_REQUESTED == true ? "Dev ✓" : "~Dev~"
+    optionsMsg += env.DEV_DEPLOYMENT_REQUESTED == 'true' ? "Dev ✓" : "~Dev~"
 
     optionsMsg += " | "
-    optionsMsg += env.STAGING_DEPLOYMENT_REQUESTED == true ? "Staging ✓" : "~Staging~"
+    optionsMsg += env.STAGING_DEPLOYMENT_REQUESTED == 'true' ? "Staging ✓" : "~Staging~"
 
     optionsMsg += " | "
-    optionsMsg += env.PROD_DEPLOYMENT_REQUESTED == true ? "Prod ✓" : "~Prod~"
+    optionsMsg += env.PROD_DEPLOYMENT_REQUESTED == 'true' ? "Prod ✓" : "~Prod~"
   }
 
   def linksMsg = "<${BUILD_URL}|Jenkins Build>"
-  linksMsg += env.PROD_DEPLOYMENT_REQUESTED == true ? " | ${SLACK_RELEASE_LINK}" : ""
+  linksMsg += env.PROD_DEPLOYMENT_REQUESTED == 'true' ? " | ${SLACK_RELEASE_LINK}" : ""
 
   slackSendInfo(
     """
