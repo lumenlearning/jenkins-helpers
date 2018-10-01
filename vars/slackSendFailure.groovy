@@ -1,7 +1,4 @@
-def call(msg, channel = "#dev-noisy") {
-  slackSend(
-    channel: channel,
-    color: 'danger',
-    message: msg
-  )
+def call(options = []) {
+  options.color = 'danger'
+  slackSendBase(options)
 }
