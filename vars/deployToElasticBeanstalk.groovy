@@ -1,30 +1,30 @@
-def call(Map config) {
-  assert config.deployName != null
-  assert config.profile != null
-  assert config.appName != null
-  assert config.envName != null
-  assert config.buildLabel != null
+def call(Map options) {
+  assert options.deployName != null
+  assert options.profile != null
+  assert options.appName != null
+  assert options.envName != null
+  assert options.buildLabel != null
 
-  if (config.sleepTime == null) {
-    config.sleepTime = 75
+  if (options.sleepTime == null) {
+    options.sleepTime = 75
   }
 
   // Deploy the previously created EB version
   deployElasticBeanstalkVersion(
-    config.profile,
-    config.appName,
-    config.envName,
-    config.buildLabel
+    options.profile,
+    options.appName,
+    options.envName,
+    options.buildLabel
   )
 
   // Send a Slack message indicating the EB deploy has started
   slackSendInfo(
-    """:rocket: Build "${BUILD_LABEL}" deploy to *${config.deployName}* started..."""
+    message: """:rocket: Build "${env.BUILD_LABEL}" deploy to *${options.deployName}* started..."""
   )
 
   // Sleep because EB deploys are never very quick, and we don't need to poll
   // right away
-  sleep config.sleepTime
+  sleep options.sleepTime
 
   def success = false
   def tries = 0
@@ -34,7 +34,7 @@ def call(Map config) {
     echo "EB Status try: ${tries}"
 
     // Check the current status of the EB Application
-    def health = evaluateElasticBeanstalkStatus(config.profile, config.envName)
+    def health = evaluateElasticBeanstalkStatus(options.profile, options.envName)
 
     success = health == 'Green'
 
@@ -46,5 +46,7 @@ def call(Map config) {
   }
 
   // Send a Slack message indicating the EB deploy has completed
-  slackSendSuccess(""":rocket: Build "${BUILD_LABEL}" deploy to *${config.deployName}* succeeded.""")
+  slackSendSuccess(
+    message: """:rocket: Build "${env.BUILD_LABEL}" deploy to *${options.deployName}* succeeded."""
+  )
 }
