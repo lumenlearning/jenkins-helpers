@@ -1,5 +1,7 @@
 def call(options) {
-  if (currentBuild.currentResult == 'SUCCESS') {
+  assert options.result != null
+
+  if (options.result == 'SUCCESS') {
     slackSendSuccess(
       message: """:unicorn_face: Build "${env.BUILD_LABEL}" *Complete*"""
     )
