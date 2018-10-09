@@ -5,8 +5,8 @@ def setupEnvironments() {
 
   env.PROD_DEPLOYMENT_REQUESTED = (env.TAG_NAME != null && env.TAG_NAME != "")
   // Dev and Staging always happen for Prod deploys
-  env.DEV_DEPLOYMENT_REQUESTED = params.DEV_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
-  env.STAGING_DEPLOYMENT_REQUESTED = params.STAGING_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == true
+  env.DEV_DEPLOYMENT_REQUESTED = params.DEV_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == 'true'
+  env.STAGING_DEPLOYMENT_REQUESTED = params.STAGING_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == 'true'
 
   // If any server deployment was requested
   env.DEPLOY_REQUESTED = (

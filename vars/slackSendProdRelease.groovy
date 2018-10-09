@@ -3,7 +3,7 @@ def call(options) {
 
   def desc = ""
 
-  if (appDesc != '') {
+  if (options.appDesc != '') {
     desc = " (${appDesc})"
   }
 
