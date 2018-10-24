@@ -3,7 +3,13 @@ def setupEnvironments() {
   assert params.DEV_DEPLOYMENT_REQUESTED instanceof Boolean
   assert params.STAGING_DEPLOYMENT_REQUESTED instanceof Boolean
 
-  env.PROD_DEPLOYMENT_REQUESTED = (env.TAG_NAME != null && env.TAG_NAME != "")
+  // Prod deploys are automatically triggered when a git tag is present.
+  // Also check for PROD_DEPLOYMENT_REQUESTED param so any project an optionally
+  // add that question if needed.
+  env.PROD_DEPLOYMENT_REQUESTED = (
+    params.PROD_DEPLOYMENT_REQUESTED == true ||
+    (env.TAG_NAME != null && env.TAG_NAME != "")
+  )
   // Dev and Staging always happen for Prod deploys
   env.DEV_DEPLOYMENT_REQUESTED = params.DEV_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == 'true'
   env.STAGING_DEPLOYMENT_REQUESTED = params.STAGING_DEPLOYMENT_REQUESTED == true || env.PROD_DEPLOYMENT_REQUESTED == 'true'
