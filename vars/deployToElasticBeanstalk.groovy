@@ -26,20 +26,7 @@ def call(Map options) {
   // right away
   sleep options.sleepTime
 
-  def success = false
-  def tries = 0
-
-  waitUntil {
-    tries += 1
-    echo "EB Status try: ${tries}"
-
-    // Check the current status of the EB Application
-    def health = evaluateElasticBeanstalkStatus(options.profile, options.envName)
-
-    success = health == 'Green'
-
-    return health != ''
-  }
+  success = waitForBeanstalkStatus(20, 5, options)
 
   if (success == false) {
     return false
