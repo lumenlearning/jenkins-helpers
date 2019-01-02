@@ -6,7 +6,7 @@
  */
 def call(Map options) {
     int maxWaitMins = options.beanstalkMaxWaitMins ?: 20
-    long statusCheckIntervalMs = 5000
+    long statusCheckIntervalSecs = options.beanstalkCheckIntervalSecs ?: 5
 
     long instantStarted = Instant.now()
     int tries = 0
@@ -27,6 +27,6 @@ def call(Map options) {
             return false
         }
 
-        sleep(statusCheckIntervalMs)
+        sleep(statusCheckIntervalSecs * 1000)
     }
 }

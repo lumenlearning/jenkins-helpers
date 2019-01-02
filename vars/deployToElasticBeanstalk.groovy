@@ -26,7 +26,7 @@ def call(Map options) {
   // right away
   sleep options.sleepTime
 
-  success = waitForBeanstalkStatus(20, 5, options)
+  success = waitForBeanstalkStatus(options)
 
   if (success == false) {
     return false
